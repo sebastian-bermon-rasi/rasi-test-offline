@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <title>RASI Med — Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <style>
+        body{font-family:system-ui,Arial;margin:2rem}
+        a.btn{display:inline-block;padding:.6rem 1rem;border:1px solid #333;border-radius:8px;text-decoration:none}
+        .offline-banner{position:fixed;left:0;right:0;top:0;background:#222;color:#fff;
+            padding:.5rem 1rem;text-align:center;display:none}
+        html.offline .offline-banner{display:block}
+    </style>
+</head>
+<body>
+<div class="offline-banner">Estás en modo offline. La UI carga desde caché.</div>
+<h1>RASI Med — Demo</h1>
+<p><a class="btn" href="/pacientes.html">CRUD Pacientes</a></p>
+<p><a class="btn" href="/citas.html">Agendación de Citas</a></p>
+
+<script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+<script src="/db.js"></script>
+<script src="/sync.js"></script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try { await navigator.serviceWorker.register('/sw.js', {scope:'/'}); } catch(e){ console.error(e); }
+        });
+    }
+    window.addEventListener('online', ()=> document.documentElement.classList.remove('offline'));
+    window.addEventListener('offline',()=> document.documentElement.classList.add('offline'));
+    if (!navigator.onLine) document.documentElement.classList.add('offline');
+</script>
+</body>
+</html>

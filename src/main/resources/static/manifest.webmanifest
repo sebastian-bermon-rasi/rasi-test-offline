@@ -1,0 +1,7 @@
+{
+  "name": "RASI Med Offline Demo",
+  "short_name": "RASI Med",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": []
+}

@@ -1,0 +1,13 @@
+com/rasi/med/cita/api/CitaSyncController.class
+com/rasi/med/OfflineDemoApplication.class
+com/rasi/med/paciente/api/PacienteController.class
+com/rasi/med/sync/IdempotencyOp.class
+com/rasi/med/paciente/repo/PacienteRepository.class
+com/rasi/med/paciente/domain/Paciente.class
+com/rasi/med/common/api/ChangesResponse.class
+com/rasi/med/paciente/api/PacienteMapper.class
+com/rasi/med/sync/IdempotencyOpRepository.class
+com/rasi/med/paciente/api/PacienteDto.class
+com/rasi/med/paciente/service/PacienteService.class
+com/rasi/med/paciente/api/PacienteSyncController.class
+com/rasi/med/common/error/GlobalExceptionHandler.class

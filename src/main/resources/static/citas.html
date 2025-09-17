@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <title>Citas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body{font-family:system-ui,Arial;margin:2rem}
+        table{border-collapse:collapse;width:100%}
+        td,th{border:1px solid #ccc;padding:.4rem}
+        .row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+        input,select{padding:.3rem}
+        .offline-banner{position:fixed;left:0;right:0;top:0;background:#222;color:#fff;
+            padding:.5rem 1rem;text-align:center;display:none}
+        html.offline .offline-banner{display:block}
+    </style>
+</head>
+<body>
+<div class="offline-banner">Estás en modo offline (UI cacheada). Datos offline vendrán en el siguiente paso.</div>
+<h1>Citas</h1>
+<p><a href="/index.html">⬅ Volver</a></p>
+
+<div class="row">
+    <div>
+        <label>Paciente</label><br>
+        <select id="pacienteSel"></select>
+    </div>
+    <div>
+        <label>Fecha</label><br>
+        <input id="fecha" type="date">
+    </div>
+    <div>
+        <label>Hora</label><br>
+        <input id="hora" type="time" step="1800" value="09:00">
+    </div>
+    <div>
+        <label>Profesional</label><br>
+        <input id="prof" placeholder="Dr(a).">
+    </div>
+    <div>
+        <label>Sede</label><br>
+        <input id="sede" placeholder="Sede Principal">
+    </div>
+    <div>
+        <label>Motivo</label><br>
+        <input id="motivo" placeholder="Control">
+    </div>
+    <div style="align-self:flex-end">
+        <button id="btnAgendar">Agendar</button>
+    </div>
+</div>
+
+<h2>Citas del día</h2>
+<div class="row">
+    <input id="dia" type="date">
+    <button id="btnCargar">Cargar</button>
+</div>
+
+<table id="tabla">
+    <thead>
+    <tr><th>Hora</th><th>Paciente</th><th>Profesional</th><th>Sede</th><th>Estado</th><th>Versión</th><th>Acciones</th></tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+<script src="/db.js"></script>
+<script src="/sync.js"></script>
+
+<script src="/citas.js"></script>
+<script>
+    window.addEventListener('online', ()=> document.documentElement.classList.remove('offline'));
+    window.addEventListener('offline',()=> document.documentElement.classList.add('offline'));
+    if (!navigator.onLine) document.documentElement.classList.add('offline');
+</script>
+</body>
+</html>

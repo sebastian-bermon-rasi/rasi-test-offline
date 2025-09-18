@@ -1,10 +1,14 @@
 # --- build (Maven + JDK 8) ---
+# --- build (Maven + JDK 8) ---
 FROM maven:3.9.6-eclipse-temurin-8 AS build
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
 COPY src ./src
-RUN mvn -q -DskipTests package
+# fuerza file.encoding/encoding a UTF-8 durante el build
+RUN mvn -q -DskipTests -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 package
+
 
 # --- runtime (JRE 8 pequeño) ---
 FROM eclipse-temurin:8-jre

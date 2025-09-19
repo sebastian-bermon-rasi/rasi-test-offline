@@ -1,7 +1,7 @@
 -- Pacientes
 create table if not exists patients (
-                                        id uuid primary key,
-                                        document_number varchar(50) not null unique,
+    id uuid primary key,
+    document_number varchar(50) not null unique,
     name varchar(150) not null,
     updated_at timestamp not null default now(),
     deleted boolean not null default false
@@ -25,3 +25,7 @@ create table if not exists sync_tokens (
                                            client_id varchar(64) not null unique,
     last_sync_at timestamp not null default '1970-01-01'
     );
+
+alter table if exists paciente
+    add constraint uk_paciente_tipodoc_numdoc unique (tipo_doc, num_doc);
+create index if not exists idx_paciente_updated_at on paciente (updated_at);

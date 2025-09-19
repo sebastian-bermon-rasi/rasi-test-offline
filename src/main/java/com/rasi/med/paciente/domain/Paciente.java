@@ -1,17 +1,20 @@
 // Paciente.java
 package com.rasi.med.paciente.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.OffsetDateTime;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "paciente")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Paciente {
 
     @Id

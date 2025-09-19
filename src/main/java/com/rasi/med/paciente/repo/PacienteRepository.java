@@ -1,21 +1,18 @@
-// PacienteRepository.java
 package com.rasi.med.paciente.repo;
 
 import com.rasi.med.paciente.domain.Paciente;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
 
-    Optional<Paciente> findByTipoDocAndNumDocAndDeletedAtIsNull(String tipoDoc, String numDoc);
+    // Por documento (para conflictos)
+    Optional<Paciente> findByTipoDocAndNumDoc(String tipoDoc, String numDoc);
 
-    Page<Paciente> findByDeletedAtIsNull(Pageable pageable);
-
-    List<Paciente> findByUpdatedAtAfterOrDeletedAtAfter(OffsetDateTime since1, OffsetDateTime since2);
+    // Cambios desde “since”
+    @Query("select p from Paciente p where p.updatedAt > :since")
+    List<Paciente> findChangesSince(@Param("since") OffsetDateTime since);
 }

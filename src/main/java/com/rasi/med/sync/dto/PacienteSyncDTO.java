@@ -13,12 +13,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class PacienteSyncDTO {
-    public UUID publicId;
-    String tipoDoc;
-    String numDoc;
-    String nombre1;
-    String apellido1;
-    String email;
-    OffsetDateTime updatedAt;
-    OffsetDateTime deletedAt;
+    private UUID publicId;
+    private String tipoDoc;
+    private String numDoc;
+    private String nombre1;
+    private String apellido1;
+    private String email;
+    private OffsetDateTime updatedAt;
+    private OffsetDateTime deletedAt;
 }

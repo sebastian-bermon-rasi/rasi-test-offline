@@ -1,59 +1,69 @@
-// PacienteService.java
 package com.rasi.med.paciente.service;
 
-import com.rasi.med.paciente.api.PacienteDto;
-import com.rasi.med.paciente.api.PacienteMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rasi.med.paciente.domain.Paciente;
 import com.rasi.med.paciente.repo.PacienteRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.rasi.med.sync.dto.PacienteSyncDTO;
+import com.rasi.med.sync.local.OutboxService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.OptimisticLockException;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.OffsetDateTime;
 
 @Service
+@RequiredArgsConstructor
+@Profile("sede")
 public class PacienteService {
 
     private final PacienteRepository repo;
-    private final PacienteMapper mapper;
+    private final OutboxService outbox;
+    private final ObjectMapper mapper;
 
-    public PacienteService(PacienteRepository repo, PacienteMapper mapper) {
-        this.repo = repo;
-        this.mapper = mapper;
-    }
-
-    public Page<PacienteDto> list(Pageable pageable) {
-        return repo.findByDeletedAtIsNull(pageable).map(mapper::toDto);
-    }
-
-    public Optional<PacienteDto> get(UUID id) {
-        return repo.findById(id).filter(p -> p.getDeletedAt()==null).map(mapper::toDto);
-    }
-
-    public PacienteDto create(PacienteDto dto) {
-        Paciente p = mapper.toEntity(dto);
-        // En alta, deja que @PrePersist ponga UUID si viene null
-        return mapper.toDto(repo.save(p));
-    }
-
-    public PacienteDto update(UUID id, int expectedVersion, PacienteDto dto) {
-        Paciente p = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("No existe paciente"));
-        if (p.getDeletedAt()!=null) throw new IllegalStateException("Paciente eliminado");
-        if (p.getVersion() == null || p.getVersion().intValue() != expectedVersion) {
-            throw new OptimisticLockException("Versión desfasada");
-        }
-        mapper.copy(dto, p);
+    @Transactional
+    public Paciente save(Paciente p){
         Paciente saved = repo.save(p);
-        return mapper.toDto(saved);
+
+        PacienteSyncDTO dto = PacienteSyncDTO.builder()
+                .publicId(saved.getPublicId())
+                .tipoDoc(saved.getTipoDoc())
+                .numDoc(saved.getNumDoc())
+                .nombre1(saved.getNombre1())
+                .apellido1(saved.getApellido1())
+                .email(saved.getEmail())
+                .updatedAt(saved.getUpdatedAt())
+                .deletedAt(saved.getDeletedAt())
+                .build();
+
+        try {
+            outbox.enqueue("paciente", saved.getPublicId(), "UPSERT", mapper.writeValueAsString(dto));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return saved;
     }
 
-    public void softDelete(UUID id, int expectedVersion) {
-        Paciente p = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("No existe paciente"));
-        if (p.getVersion() == null || p.getVersion().intValue() != expectedVersion)
-            throw new OptimisticLockException("Versión desfasada");
-        p.setDeletedAt(java.time.OffsetDateTime.now());
+    @Transactional
+    public void softDelete(Paciente p){
+        p.setDeletedAt(OffsetDateTime.now());
         repo.save(p);
+
+        PacienteSyncDTO dto = PacienteSyncDTO.builder()
+                .publicId(p.getPublicId())
+                .tipoDoc(p.getTipoDoc())
+                .numDoc(p.getNumDoc())
+                .nombre1(p.getNombre1())
+                .apellido1(p.getApellido1())
+                .email(p.getEmail())
+                .updatedAt(p.getUpdatedAt())
+                .deletedAt(p.getDeletedAt())
+                .build();
+
+        try {
+            outbox.enqueue("paciente", p.getPublicId(), "DELETE", mapper.writeValueAsString(dto));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

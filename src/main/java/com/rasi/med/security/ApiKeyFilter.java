@@ -1,32 +1,41 @@
 package com.rasi.med.security;
 
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.context.annotation.Profile;
 
 import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class ApiKeyFilter extends OncePerRequestFilter {
+@Profile("central")
+public class ApiKeyFilter implements Filter {
 
-    private final String requiredApiKey;
+    private final String apiKey;
 
-    public ApiKeyFilter(String requiredApiKey) {
-        this.requiredApiKey = requiredApiKey;
+    public ApiKeyFilter(String apiKey) {
+        this.apiKey = apiKey;
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        // solo protege los endpoints de sync (ajusta el path si cambias)
-        String path = request.getRequestURI();
-        if (path.startsWith("/api/sync/")) {
-            String header = request.getHeader("X-Api-Key");
-            if (header == null || !header.equals(requiredApiKey)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("missing/invalid api key");
-                return;
-            }
+    @Override public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+        String uri = request.getRequestURI();
+
+        // ✅ Aplica seguridad SOLO al namespace de sync
+        if (!uri.startsWith("/api/sync/")) {
+            chain.doFilter(req, res);
+            return;
         }
-        chain.doFilter(request, response);
+
+        String header = request.getHeader("X-Api-Key");
+        if (header == null || !header.equals(apiKey)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Missing/invalid API key");
+            return;
+        }
+
+        chain.doFilter(req, res);
     }
 }

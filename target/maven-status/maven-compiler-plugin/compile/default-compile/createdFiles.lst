@@ -12,11 +12,13 @@ com/rasi/med/cita/api/CitaDto.class
 com/rasi/med/sync/local/OutboxService.class
 com/rasi/med/common/api/ChangesResponse.class
 com/rasi/med/sync/dto/PullResponse.class
+com/rasi/med/sync/outbox/Outbox.class
 com/rasi/med/sync/dto/PushRequest.class
 com/rasi/med/sync/dto/ChangeOp.class
 com/rasi/med/sync/central/CentralSyncController.class
 com/rasi/med/sync/dto/PacienteSyncDTO$PacienteSyncDTOBuilder.class
 com/rasi/med/sync/local/LocalSyncController.class
+com/rasi/med/sync/outbox/OutboxRepository.class
 com/rasi/med/sync/central/CentralPacienteService$ResultadoUpsert.class
 com/rasi/med/sync/SyncTokenService.class
 com/rasi/med/sync/central/CentralSyncController$2.class
@@ -32,9 +34,9 @@ com/rasi/med/paciente/domain/Paciente.class
 com/rasi/med/sync/central/CentralSyncController$1.class
 com/rasi/med/sync/dto/PacienteSyncDTO.class
 com/rasi/med/paciente/api/PacienteMapper.class
+com/rasi/med/paciente/PacienteService.class
 com/rasi/med/sync/IdempotencyOpRepository.class
 com/rasi/med/cita/domain/Cita.class
 com/rasi/med/paciente/api/PacienteDto.class
-com/rasi/med/paciente/service/PacienteService.class
 com/rasi/med/paciente/api/PacienteSyncController.class
 com/rasi/med/common/error/GlobalExceptionHandler.class

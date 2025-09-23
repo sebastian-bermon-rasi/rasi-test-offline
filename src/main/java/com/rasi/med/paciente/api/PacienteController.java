@@ -1,69 +1,46 @@
 package com.rasi.med.paciente.api;
 
+import com.rasi.med.paciente.PacienteService;
 import com.rasi.med.paciente.domain.Paciente;
 import com.rasi.med.paciente.repo.PacienteRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
+@Controller
+@RequiredArgsConstructor
 @RequestMapping("/api/pacientes")
+@Profile("sede")
 public class PacienteController {
 
-    private final PacienteRepository repo;
-    private final PacienteMapper mapper;
-
-    public PacienteController(PacienteRepository repo, PacienteMapper mapper) {
-        this.repo = repo; this.mapper = mapper;
-    }
-
-    @GetMapping
-    public List<PacienteDto> list() {
-        return repo.findAll().stream().filter(p->p.getDeletedAt()==null).map(mapper::toDto).collect(Collectors.toList());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<PacienteDto> get(@PathVariable UUID id) {
-        Optional<Paciente> p = repo.findById(id);
-        if (!p.isPresent() || p.get().getDeletedAt()!=null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(mapper.toDto(p.get()));
-    }
+    private final PacienteService service;     // <<-- usa el SERVICE
+    private final PacienteRepository repo;     // solo para lecturas/listados
 
     @PostMapping
-    public ResponseEntity<PacienteDto> create(@Valid @RequestBody PacienteDto dto) {
-        Paciente p = mapper.toEntity(dto);
-        Paciente saved = repo.save(p);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(saved));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable UUID id, @Valid @RequestBody PacienteDto dto,
-                                    @RequestHeader(value="If-Match", required=false) String ifMatch) {
-        Paciente p = repo.findById(id).orElse(null);
-        if (p == null || p.getDeletedAt()!=null) return ResponseEntity.notFound().build();
-        if (ifMatch == null) return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body("Falta If-Match");
-        int expected = Integer.parseInt(ifMatch.replace("W/","").replace("\"",""));
-        if (p.getVersion()==null || p.getVersion().intValue()!=expected) return ResponseEntity.status(HttpStatus.CONFLICT).body("409");
-        mapper.copy(dto, p);
-        Paciente saved = repo.save(p);
-        return ResponseEntity.ok().eTag("W/\"" + saved.getVersion() + "\"").body(mapper.toDto(saved));
+    @ResponseBody
+    public ResponseEntity<Paciente> crear(@RequestBody Paciente p) {
+        Paciente saved = service.save(p);      // <<-- NO usar repo.save aquí
+        return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id,
-                                    @RequestHeader(value="If-Match", required=false) String ifMatch) {
-        Paciente p = repo.findById(id).orElse(null);
+    @ResponseBody
+    public ResponseEntity<Void> borrar(@PathVariable("id") UUID publicId) {
+        Paciente p = repo.findById(publicId).orElse(null);
         if (p == null) return ResponseEntity.notFound().build();
-        if (ifMatch == null) return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body("Falta If-Match");
-        int expected = Integer.parseInt(ifMatch.replace("W/","").replace("\"",""));
-        if (p.getVersion()==null || p.getVersion().intValue()!=expected) return ResponseEntity.status(HttpStatus.CONFLICT).body("409");
-        p.setDeletedAt(java.time.OffsetDateTime.now());
-        repo.save(p);
+        service.softDelete(p);                 // <<-- pasa por el SERVICE
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    @ResponseBody
+    public ResponseEntity<List<Paciente>> listar() {
+        return ResponseEntity.ok(repo.findAll());
     }
 }

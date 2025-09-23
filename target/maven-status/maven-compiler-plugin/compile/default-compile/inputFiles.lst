@@ -24,10 +24,12 @@
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/config/HttpConfig.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/paciente/api/PacienteSyncController.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/cita/api/CitaDto.java
+/home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/sync/outbox/OutboxRepository.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/cita/api/CitaSyncController.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/sync/IdempotencyOpRepository.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/paciente/PacienteService.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/paciente/domain/Paciente.java
+/home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/sync/outbox/Outbox.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/OfflineDemoApplication.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/security/SecurityConfig.java
 /home/sebastian-bermon/Repos/rasi-med-offline/src/main/java/com/rasi/med/sync/local/LocalSyncController.java

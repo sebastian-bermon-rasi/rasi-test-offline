@@ -1,4 +1,4 @@
-package com.rasi.med.paciente.service;
+package com.rasi.med.paciente;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rasi.med.paciente.domain.Paciente;

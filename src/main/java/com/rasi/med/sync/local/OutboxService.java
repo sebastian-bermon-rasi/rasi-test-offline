@@ -1,11 +1,14 @@
 package com.rasi.med.sync.local;
 
+import com.rasi.med.sync.outbox.Outbox;
+import com.rasi.med.sync.outbox.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -14,12 +17,17 @@ import java.util.*;
 public class OutboxService {
 
     private final JdbcTemplate jdbc;
+    private final OutboxRepository repo;
 
     @Transactional
-    public void enqueue(String aggregateType, UUID aggregateId, String op, String jsonPayload){
+    public void enqueue(String aggregateType, UUID aggregateId, String op, String payloadJson) {
         jdbc.update(
-                "insert into outbox(id, aggregate_type, aggregate_id, op, payload) values (?,?,?, ?, cast(? as jsonb))",
-                UUID.randomUUID(), aggregateType, aggregateId, op, jsonPayload
+                "INSERT INTO outbox (id, aggregate_type, aggregate_id, op, payload, created_at, published) " + "VALUES (?, ?, ?, ?, ?::jsonb, now(), false)",
+                UUID.randomUUID(),             // id
+                aggregateType,                 // aggregate_type
+                aggregateId,                   // aggregate_id
+                op,                            // op
+                payloadJson                    // payload (String con JSON), se castea con ::jsonb
         );
     }
 

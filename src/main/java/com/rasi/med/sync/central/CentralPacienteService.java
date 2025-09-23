@@ -1,9 +1,14 @@
+// CentralPacienteService.java
 package com.rasi.med.sync.central;
 
 import com.rasi.med.paciente.domain.Paciente;
 import com.rasi.med.paciente.repo.PacienteRepository;
+import com.rasi.med.sync.dto.ChangeOp;
 import com.rasi.med.sync.dto.PacienteSyncDTO;
+import com.rasi.med.sync.dto.PullResponse;
+import com.rasi.med.sync.dto.PushRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +21,17 @@ public class CentralPacienteService {
 
     private final PacienteRepository repo;
 
+    @Value("${sync.apiKey:TESTOFFLINE}")
+    private String configuredApiKey;
+
+    // --- validación simple de API Key
+    private void ensureApiKey(String apiKey) {
+        if (configuredApiKey == null || !configuredApiKey.equals(apiKey)) {
+            throw new SecurityException("Invalid API key");
+        }
+    }
+
+    // ===== LÓGICA DE NEGOCIO EXISTENTE =====
     @Transactional(readOnly = true)
     public List<PacienteSyncDTO> changesSince(OffsetDateTime since){
         List<Paciente> list = repo.findChangesSince(since);
@@ -26,7 +42,6 @@ public class CentralPacienteService {
 
     @Transactional
     public ResultadoUpsert upsert(PacienteSyncDTO dto){
-        // Reglas: unicidad (tipoDoc,numDoc)
         Optional<Paciente> byDoc = repo.findByTipoDocAndNumDoc(dto.getTipoDoc(), dto.getNumDoc());
         if (byDoc.isPresent() && !byDoc.get().getPublicId().equals(dto.getPublicId())) {
             return ResultadoUpsert.conflict("tipoDoc+numDoc", byDoc.get().getPublicId());
@@ -38,7 +53,6 @@ public class CentralPacienteService {
             return p;
         });
 
-        // last-write-wins por updatedAt
         if (target.getUpdatedAt() == null || dto.getUpdatedAt().isAfter(target.getUpdatedAt())) {
             target.setTipoDoc(dto.getTipoDoc());
             target.setNumDoc(dto.getNumDoc());
@@ -62,6 +76,50 @@ public class CentralPacienteService {
                 .email(p.getEmail())
                 .updatedAt(p.getUpdatedAt())
                 .deletedAt(p.getDeletedAt())
+                .build();
+    }
+
+    // ===== NUEVOS MÉTODOS OPCIONALES PARA MOVER LA LÓGICA DEL CONTROLLER =====
+
+    @Transactional
+    public Map<String,Object> processPush(String apiKey, PushRequest body){
+        ensureApiKey(apiKey);
+
+        List<Map<String,Object>> conflicts = new ArrayList<>();
+        if (body.getPacientes() != null){
+            for (ChangeOp ch : body.getPacientes()){
+                PacienteSyncDTO d = ch.getData();
+                if ("DELETE".equalsIgnoreCase(ch.getOperation())) {
+                    if (d.getDeletedAt() == null) d.setDeletedAt(OffsetDateTime.now());
+                }
+                ResultadoUpsert r = upsert(d);
+                if (!r.isOk()){
+                    Map<String,Object> c = new HashMap<String,Object>();
+                    c.put("entity","paciente");
+                    c.put("field", r.getConflictField());
+                    c.put("conflictId", r.getConflictId());
+                    c.put("publicId", d.getPublicId());
+                    conflicts.add(c);
+                }
+            }
+        }
+        Map<String,Object> res = new HashMap<String,Object>();
+        res.put("accepted", conflicts.isEmpty());
+        res.put("conflicts", conflicts);
+        return res;
+    }
+
+    @Transactional(readOnly = true)
+    public PullResponse listChanges(String apiKey, String clientId, String sinceIso){
+        ensureApiKey(apiKey);
+        OffsetDateTime since = OffsetDateTime.parse(sinceIso);
+        OffsetDateTime until = OffsetDateTime.now();
+        List<PacienteSyncDTO> list = changesSince(since);
+        return PullResponse.builder()
+                .since(since)
+                .until(until)
+                .pacientes(list)
+                .hasMore(false)
                 .build();
     }
 

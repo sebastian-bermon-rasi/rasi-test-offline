@@ -21,7 +21,6 @@ com/rasi/med/sync/local/LocalSyncController.class
 com/rasi/med/sync/outbox/OutboxRepository.class
 com/rasi/med/sync/central/CentralPacienteService$ResultadoUpsert.class
 com/rasi/med/sync/SyncTokenService.class
-com/rasi/med/sync/central/CentralSyncController$2.class
 com/rasi/med/sync/SyncTokenRepository.class
 com/rasi/med/paciente/api/PacienteController.class
 com/rasi/med/sync/SyncToken.class
@@ -31,7 +30,6 @@ com/rasi/med/config/HttpConfig.class
 com/rasi/med/cita/api/CitaController.class
 com/rasi/med/sync/dto/PushRequest$PushRequestBuilder.class
 com/rasi/med/paciente/domain/Paciente.class
-com/rasi/med/sync/central/CentralSyncController$1.class
 com/rasi/med/sync/dto/PacienteSyncDTO.class
 com/rasi/med/paciente/api/PacienteMapper.class
 com/rasi/med/paciente/PacienteService.class

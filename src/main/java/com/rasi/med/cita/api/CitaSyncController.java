@@ -6,6 +6,7 @@ import com.rasi.med.paciente.domain.Paciente;
 import com.rasi.med.paciente.repo.PacienteRepository;
 import com.rasi.med.sync.IdempotencyOp;
 import com.rasi.med.sync.IdempotencyOpRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/citas/sync")
+@Profile("sede")
 public class CitaSyncController {
 
     private final CitaRepository repo;

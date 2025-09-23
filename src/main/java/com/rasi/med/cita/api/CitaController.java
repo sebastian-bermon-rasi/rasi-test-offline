@@ -5,6 +5,7 @@ import com.rasi.med.cita.repo.CitaRepository;
 import com.rasi.med.paciente.domain.Paciente;
 import com.rasi.med.paciente.repo.PacienteRepository;
 import lombok.var;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Profile("sede")
 @RestController
 @RequestMapping("/api/citas")
 public class CitaController {

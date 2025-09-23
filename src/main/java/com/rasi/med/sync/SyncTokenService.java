@@ -1,12 +1,15 @@
 package com.rasi.med.sync;
 
+import lombok.RequiredArgsConstructor;
 import lombok.var;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
 @Service
+@Profile("sede")
 public class SyncTokenService {
     private final SyncTokenRepository repo;
 
